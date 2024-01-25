@@ -4,9 +4,11 @@ import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -22,7 +24,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final int DB_VERSION = 1;
 
     User user = null;
-    ArrayList<Contact> contacts = new ArrayList<>();
+
 
 
     public DBHelper(@Nullable Context context) {
@@ -157,6 +159,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @SuppressLint("Range")
     public ArrayList<Contact> getAllUserContacts(int userID) {
+        ArrayList<Contact> contacts = new ArrayList<Contact>();
         String[] s = new String[]{String.valueOf(userID)};
         Cursor cursor = this.getReadableDatabase().rawQuery("SELECT first_name,last_name,email,telephone FROM contact WHERE user_id=?", s);
         if (cursor != null) {
@@ -177,6 +180,33 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         return contacts;
     }
+
+    @SuppressLint("Range")
+    public ArrayList<Contact> searchUserContacts(String name,int userID) {
+        ArrayList<Contact> contacts = new ArrayList<Contact>();
+        String firstNameLastName = "%" + name + "%";
+        String[] s = new String[]{String.valueOf(userID), firstNameLastName};
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT first_name,last_name,email,telephone FROM contact WHERE user_id=? AND first_name_last_name LIKE ? ", s);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                for (int i = 0; i < cursor.getCount(); i++) {
+                    String firstName = cursor.getString(cursor.getColumnIndex("first_name"));
+                    String lastName = cursor.getString(cursor.getColumnIndex("last_name"));
+                    String telephone = cursor.getString(cursor.getColumnIndex("telephone"));
+                    String email = cursor.getString(cursor.getColumnIndex("email"));
+                    contacts.add(new Contact(firstName, lastName, firstName + " " + lastName, email, telephone));
+
+                    //move to the next row in the database
+                    cursor.moveToNext();
+                }
+
+                cursor.close();
+
+            }
+        }
+    return contacts;
+    }
+
 
 
 }
