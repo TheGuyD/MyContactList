@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
         //enable full screen
         EdgeToEdge.enable(this);
 
-        //set the View
+        //set the layout for UI
         setContentView(R.layout.activity_main);
 
 

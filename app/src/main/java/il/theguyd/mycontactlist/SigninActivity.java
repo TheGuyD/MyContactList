@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,6 +29,8 @@ public class SigninActivity extends AppCompatActivity {
     private ContactAdapter adapter;
 
     DBHelper databaseHelper;
+
+    User user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,46 +70,18 @@ public class SigninActivity extends AppCompatActivity {
                 //get the text from use input
                 String email = edtEmailSignin.getText().toString();
                 String password = edtTxtPasswordSignin.getText().toString();
-                try {
-                    //TODO: add try catch block
-
-                    //open the database for read operations
-                    SQLiteDatabase db = databaseHelper.getReadableDatabase();
-
-                    //init values for query place holders to prevent SQL injection attacks
-                    String[] s = new String[]{email, password};
-                    Cursor cursor = db.rawQuery("SELECT id,first_name,email,telephone FROM user WHERE email=?AND password=?", s);
-
-                    if (cursor != null) {
-                        if (cursor.moveToFirst()) {
-                            @SuppressLint("Range") User user = new User(cursor.getInt(cursor.getColumnIndex("id")), cursor.getString(cursor.getColumnIndex("first_name")), cursor.getString(cursor.getColumnIndex("email")), cursor.getString(cursor.getColumnIndex("telephone")));
-                            System.out.println(user);
-
-
-                            //close database connection
-                            cursor.close();
-                            db.close();
-
-                            //start SearchContactActivity
-                            Intent i = new Intent(getApplicationContext(), SearchContactActivity.class);
-                            i.putExtra("userID", user.getId());
-                            startActivity(i);
-                        } else {
-                            Toast.makeText(SigninActivity.this, "user not found", Toast.LENGTH_SHORT).show();
-
-                            //close database connection
-                            cursor.close();
-                            db.close();
-                        }
-                    }else{
-                        //cursor is null so only close db connection
-                        db.close();
-                    }
-
-
-                } catch (SQLException exception) {
-                    Toast.makeText(SigninActivity.this,exception.getMessage(),Toast.LENGTH_LONG).show();
-                    //TODO: close the cursor and db inside exceptions
+                try{
+                    user = databaseHelper.searchUser(email,password);
+                }catch (SQLException exception){
+                    Log.d("ERROR",exception.getMessage().toString());
+                }
+                if(user != null){
+                    //start SearchContactActivity
+                    Intent i = new Intent(getApplicationContext(), SearchContactActivity.class);
+                    i.putExtra("userID", user.getId());
+                    startActivity(i);
+                }else{
+                    Toast.makeText(SigninActivity.this,"wrong email or password",Toast.LENGTH_SHORT).show();
                 }
             }
         });
