@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -102,42 +103,25 @@ public class SearchContactActivity extends AppCompatActivity {
     private void showAllContacts() {
         if(isValidInput(edtSearch)){
             //TODO: initialize the search in thread
+
+            //clear all data
             contacts.clear();
 
-            //after each change in the data , notufy all observers.
-            adapter.notifyDataSetChanged();
+            try{
 
-            SQLiteDatabase db = databaseHelper.getReadableDatabase();
-            String[] s = new String[]{String.valueOf(userID)};
-            Cursor cursor = db.rawQuery("SELECT first_name,last_name,email,telephone FROM contact WHERE user_id=?",s);
-            if(cursor!=null){
-                if(cursor.moveToFirst()){
-                        for (int i=0;i<cursor.getCount();i++){
-                            String firstName = cursor.getString(cursor.getColumnIndex("first_name"));
-                            String lastName = cursor.getString(cursor.getColumnIndex("last_name"));
-                            String telephone = cursor.getString(cursor.getColumnIndex("telephone"));
-                            String email = cursor.getString(cursor.getColumnIndex("email"));
-                            contacts.add(new Contact(firstName,lastName,firstName+ " " +lastName,email,telephone));
-
-                            //move to the next row in the database
-                            cursor.moveToNext();
-                        }
-                    adapter.notifyDataSetChanged();
-                    cursor.close();
-                    db.close();
-                }else{
-                    Toast.makeText(SearchContactActivity.this,"user empty contact list",Toast.LENGTH_SHORT).show();
-
-                    //close database connection
-                    cursor.close();
-                    db.close();
-                }
-            }else{
-                //cursor is null so only close db connection
-                db.close();
+                //add all the contacts of the user after query by userID
+                contacts.addAll(databaseHelper.getAllUserContacts(userID));
+            }catch (SQLException exception){
+                Log.d("ERROR",exception.getMessage().toString());
             }
+            if(contacts!= null){
 
+                //notify all observers.
+                adapter.notifyDataSetChanged();
 
+            }else{
+                Toast.makeText(SearchContactActivity.this,"no contact found",Toast.LENGTH_SHORT).show();
+            }
 
         }
     }

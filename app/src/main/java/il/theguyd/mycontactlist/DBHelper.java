@@ -7,10 +7,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+
+import il.theguyd.mycontactlist.Models.Contact;
 import il.theguyd.mycontactlist.Models.User;
 
 public class DBHelper extends SQLiteOpenHelper {
@@ -18,6 +20,10 @@ public class DBHelper extends SQLiteOpenHelper {
     //TODO: implement update,add,delete
     private static final String DB_NAME = "database1";
     private static final int DB_VERSION = 1;
+
+    User user = null;
+    ArrayList<Contact> contacts = new ArrayList<>();
+
 
     public DBHelper(@Nullable Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -127,15 +133,17 @@ public class DBHelper extends SQLiteOpenHelper {
     //search user query for userID based on email and password
     @SuppressLint("Range")
     public User searchUser(String email, String password) {
-        User user = null;
 
         //init values for query place holders to prevent SQL injection attacks
         String[] s = new String[]{email, password};
 
+        //query on readable database using the email and password instead the place holders to avoid SQL injections
         Cursor cursor = this.getReadableDatabase().rawQuery("SELECT id,first_name,email,telephone FROM user WHERE email=?AND password=?", s);
 
         if (cursor != null) {
             if (cursor.moveToFirst()) {
+
+                //found user
                 user = new User(cursor.getInt(cursor.getColumnIndex("id")), cursor.getString(cursor.getColumnIndex("first_name")), cursor.getString(cursor.getColumnIndex("email")), cursor.getString(cursor.getColumnIndex("telephone")));
                 Log.d("INFO", user.toString());
 
@@ -146,5 +154,30 @@ public class DBHelper extends SQLiteOpenHelper {
 
         return user;
     }
+
+    @SuppressLint("Range")
+    public ArrayList<Contact> getAllUserContacts(int userID) {
+        String[] s = new String[]{String.valueOf(userID)};
+        Cursor cursor = this.getReadableDatabase().rawQuery("SELECT first_name,last_name,email,telephone FROM contact WHERE user_id=?", s);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                for (int i = 0; i < cursor.getCount(); i++) {
+                    String firstName = cursor.getString(cursor.getColumnIndex("first_name"));
+                    String lastName = cursor.getString(cursor.getColumnIndex("last_name"));
+                    String telephone = cursor.getString(cursor.getColumnIndex("telephone"));
+                    String email = cursor.getString(cursor.getColumnIndex("email"));
+                    contacts.add(new Contact(firstName, lastName, firstName + " " + lastName, email, telephone));
+
+                    //move to the next row in the database
+                    cursor.moveToNext();
+                }
+                cursor.close();
+            }
+
+        }
+        return contacts;
+    }
+
+
 }
 
