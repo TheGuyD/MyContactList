@@ -1,0 +1,12 @@
+package il.theguyd.mycontactlist;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
+
+
+public interface GenderizeService {
+
+    @GET("/")
+    Call<Genderize> getGenderize(@Query("name") String firstName);
+}

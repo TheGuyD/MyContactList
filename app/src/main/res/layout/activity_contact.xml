@@ -68,10 +68,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.679"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edtGender" />
+        app:layout_constraintTop_toBottomOf="@+id/edtGenderContact" />
 
     <EditText
-        android:id="@+id/edtGender"
+        android:id="@+id/edtGenderContact"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="80dp"
@@ -94,7 +94,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.312"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edtGender" />
+        app:layout_constraintTop_toBottomOf="@+id/edtGenderContact" />
 
     <EditText
         android:id="@+id/edtEmailContact"

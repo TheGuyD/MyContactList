@@ -1,7 +1,7 @@
 package il.theguyd.mycontactlist;
 
-import static il.theguyd.mycontactlist.utils.Validations.isValidInput;
-import static il.theguyd.mycontactlist.utils.Validations.isValidName;
+import static il.theguyd.mycontactlist.utils.Utils.isValidInput;
+import static il.theguyd.mycontactlist.utils.Utils.isValidName;
 
 import android.content.Intent;
 import android.database.SQLException;
@@ -38,7 +38,7 @@ public class SearchContactActivity extends AppCompatActivity {
 
     private int userID;
     private DBHelper databaseHelper;
-    ArrayList<Contact> contacts = new ArrayList<>();
+    ArrayList<Contact> Contacts = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +67,7 @@ public class SearchContactActivity extends AppCompatActivity {
 
         //init adapter to adapt data for RecycleView items
         adapter = new ContactAdapter(this);
-        adapter.setContacts(contacts);
+        adapter.setContacts(Contacts);
         rcContact.setLayoutManager(new LinearLayoutManager(this));
         rcContact.setAdapter(adapter);
 
@@ -123,19 +123,18 @@ public class SearchContactActivity extends AppCompatActivity {
     private void showAllContacts() {
        boolean isFound = false;
         if(isValidInput(edtSearch)){
-            //TODO: initialize the search in thread
 
             //clear all data
-            contacts.clear();
+            Contacts.clear();
 
             try{
 
                 //add all the contacts of the user after query by userID
-                contacts.addAll(databaseHelper.searchAllUserContacts(userID));
+                Contacts.addAll(databaseHelper.searchAllUserContacts(userID));
             }catch (Exception exception){
                 Log.d("ERROR",exception.getMessage());
             }
-            isFound = contacts!= null;
+            isFound = Contacts != null;
             if(isFound){
 
                 //notify all observers.
@@ -151,7 +150,7 @@ public class SearchContactActivity extends AppCompatActivity {
     private void showUserContactByName(CharSequence charSequence){
 
         //clear the contacts so whenever the user input is change only new results shown
-        contacts.clear();
+        Contacts.clear();
 
 
         if(isValidName(charSequence)){
@@ -159,11 +158,11 @@ public class SearchContactActivity extends AppCompatActivity {
             try{
 
                 //add all the contacts of the user after query by userID
-                contacts.addAll(databaseHelper.searchUserContacts(String.valueOf(charSequence),userID));
+                Contacts.addAll(databaseHelper.searchUserContacts(String.valueOf(charSequence),userID));
             }catch (SQLException exception){
                 Log.d("ERROR",exception.getMessage().toString());
             }
-            if(contacts!= null){
+            if(Contacts != null){
 
                 //notify all observers.
                 adapter.notifyDataSetChanged();
@@ -204,7 +203,7 @@ public class SearchContactActivity extends AppCompatActivity {
     }
 
     public  ArrayList<Contact> getContacts(){
-        return this.contacts;
+        return this.Contacts;
     }
 
 

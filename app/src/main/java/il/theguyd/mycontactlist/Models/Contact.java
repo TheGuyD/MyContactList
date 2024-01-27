@@ -3,7 +3,7 @@ package il.theguyd.mycontactlist.Models;
 
 
 
-public class Contact   {
+public class Contact {
     private int id;
 
 
@@ -17,17 +17,20 @@ public class Contact   {
 
 
 
-    //use for new contact insertion
-    public Contact(String firstName, String lastName, String email, String telephone) {
+    //use for search contact
+    public Contact(String firstName, String lastName, String email, String telephone, String gender) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.telephone = telephone;
         this.fullName = firstName +" "+lastName;
+        this.gender = gender;
     }
 
-    //use for search  contacts
-    public Contact(String firstName, String lastName, String email, String telephone, int id) {
+
+
+    //use for search all contacts
+    public Contact(String firstName, String lastName, String email, String telephone, String gender, int id) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -39,17 +42,15 @@ public class Contact   {
 
     @Override
     public String toString() {
-        return "Contact{" +
+        return "contact{" +
                 "firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", fullName='" + fullName + '\'' +
+                ", gender='" + gender + '\'' +
                 ", email='" + email + '\'' +
                 ", telephone='" + telephone + '\'' +
                 '}';
     }
-
-
-
 
 
     public int getId() {
@@ -91,7 +92,6 @@ public class Contact   {
     }
 
     public void setGender(String gender) {
-        //TODO: user retrofit to set the gender
         this.gender = gender;
 
     }

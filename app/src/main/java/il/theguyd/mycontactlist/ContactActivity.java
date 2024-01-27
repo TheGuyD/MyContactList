@@ -1,32 +1,34 @@
 package il.theguyd.mycontactlist;
-
-import static il.theguyd.mycontactlist.utils.Validations.getWatcher;
-
+import static il.theguyd.mycontactlist.utils.Utils.getWatcherWithValidations;
 import android.content.ContentValues;
 import android.database.SQLException;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import android.util.Log;
-import android.widget.Toast;
 
 import il.theguyd.mycontactlist.Models.Contact;
 
+
+
+
 public class ContactActivity extends AppCompatActivity {
-    //TODO: what about edtGender?
-    //TODO: email can update even when is wrong
-    EditText edtFirstNameContact,edtTelephoneContact,edtEmailContact,edtLastNameContact;
 
-    Button btnUpdateContact, btnDeleteContact;
+    private EditText edtFirstNameContact,edtTelephoneContact,edtEmailContact,edtLastNameContact,edtGenderContact;
 
-    Contact contact;
-    int contactID;
+    private  Button btnUpdateContact, btnDeleteContact;
 
-    DBHelper databaseHelper;
+
+    private int contactID;
+
+    private DBHelper databaseHelper;
+
+    private Contact contact ;
 
     @Override
 
@@ -47,6 +49,7 @@ public class ContactActivity extends AppCompatActivity {
 
         //init contact
         contact = getContactInformation();
+        Log.d("INFO",contact.toString());
 
         //init Views
         initEditTextContact();
@@ -82,13 +85,14 @@ public class ContactActivity extends AppCompatActivity {
         edtLastNameContact.setText(contact.getLastName());
         edtTelephoneContact.setText(contact.getTelephone());
         edtEmailContact.setText(contact.getEmail());
+        edtGenderContact.setText(contact.getGender());
     }
 
     private void setEditTextContactListenersEventHandlers() {
-        edtFirstNameContact.addTextChangedListener(getWatcher(edtFirstNameContact,this));
-        edtLastNameContact.addTextChangedListener(getWatcher(edtLastNameContact,this));
-        edtTelephoneContact.addTextChangedListener(getWatcher(edtTelephoneContact,this));
-        edtEmailContact.addTextChangedListener(getWatcher(edtEmailContact,this));
+        edtFirstNameContact.addTextChangedListener(getWatcherWithValidations(edtFirstNameContact,this));
+        edtLastNameContact.addTextChangedListener(getWatcherWithValidations(edtLastNameContact,this));
+        edtTelephoneContact.addTextChangedListener(getWatcherWithValidations(edtTelephoneContact,this));
+        edtEmailContact.addTextChangedListener(getWatcherWithValidations(edtEmailContact,this));
     }
 
     private void setButtonContactListenersEventHandlers() {
@@ -113,47 +117,43 @@ public class ContactActivity extends AppCompatActivity {
                 //the update fields will be sent to to the update query
                 boolean isFirstNameChanged = !contact.getFirstName().equals(firstName);
                 if (isFirstNameChanged) {
-                    contact.setFirstName(firstName);
-                    contact.setFullName(fullName);
                     contentValues.put("first_name", firstName);
                     contentValues.put("first_name_last_name", fullName);
                 }
+
                 boolean isLastNameChanged = !contact.getLastName().equals(lastName);
                 if (isLastNameChanged) {
-                    contact.setLastName(lastName);
-                    contact.setFullName(fullName);
                     contentValues.put("last_name", lastName);
                     contentValues.put("first_name_last_name", fullName);
                 }
+
                 boolean isEmailChanged = !contact.getEmail().equals(email);
                 if (isEmailChanged) {
-                    contact.setEmail(email);
                     contentValues.put("email", email);
                 }
+
                 boolean isTelephoneChanged = !contact.getTelephone().equals(telephone);
                 if (isTelephoneChanged) {
-                    contact.setTelephone(telephone);
                     contentValues.put("telephone", telephone);
                 }
 
                 try {
 
                     //contentValues.isEmpty() introduced in Android API 30
-                    boolean isDiffarences = contentValues.size() != 0;
+                    boolean isDiffarences = contentValues.size()>0;
                     if (isDiffarences) {
                         rowID = databaseHelper.updateContact(contactID, contentValues);
                     }
                 } catch (Exception exception) {
-                    Log.d("ERROR", exception.getMessage().toString());
-                    Toast.makeText(ContactActivity.this, exception.getMessage().toString(), Toast.LENGTH_SHORT).show();
+                    Log.d("ERROR", exception.getMessage());
+                    Toast.makeText(ContactActivity.this, exception.getMessage(), Toast.LENGTH_SHORT).show();
                 }
                 isUpdated = rowID!=-1;
                 if (isUpdated) {
-                    StringBuilder message = new StringBuilder();
-                    message.append("contact name");
-                    message.append(fullName);
-                    message.append(" updated");
-                    Toast.makeText(ContactActivity.this, message.toString(), Toast.LENGTH_SHORT).show();
+                    String message = "contact name" +
+                            fullName +
+                            " updated";
+                    Toast.makeText(ContactActivity.this, message, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -169,17 +169,16 @@ public class ContactActivity extends AppCompatActivity {
                     rowID = databaseHelper.deleteContact(contactID);
 
                 } catch (Exception exception) {
-                    Log.d("ERROR", exception.getMessage().toString());
-                    Toast.makeText(ContactActivity.this, exception.getMessage().toString(), Toast.LENGTH_SHORT).show();
+                    Log.d("ERROR", exception.getMessage());
+                    Toast.makeText(ContactActivity.this, exception.getMessage(), Toast.LENGTH_SHORT).show();
                 }
 
                 isDelete = rowID!=-1;
                 if (isDelete) {
-                    StringBuilder message = new StringBuilder();
-                    message.append("contact name");
-                    message.append(contact.getFullName().toString());
-                    message.append(" deleted");
-                    Toast.makeText(ContactActivity.this, message.toString(), Toast.LENGTH_SHORT).show();
+                    String message = "contact name" +
+                            contact.getFullName().toString() +
+                            " deleted";
+                    Toast.makeText(ContactActivity.this, message, Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -200,6 +199,7 @@ public class ContactActivity extends AppCompatActivity {
         edtTelephoneContact = findViewById(R.id.edtTelephoneContact);
         edtEmailContact = findViewById(R.id.edtEmailContact);
         edtLastNameContact = findViewById(R.id.edtLastNameContact);
+        edtGenderContact = findViewById(R.id.edtGenderContact);
     }
 
 

@@ -15,9 +15,10 @@ import java.util.ArrayList;
 import il.theguyd.mycontactlist.Models.Contact;
 import il.theguyd.mycontactlist.Models.User;
 
+
 public class DBHelper extends SQLiteOpenHelper {
 
-    private static final String DB_NAME = "database4";
+    private static final String DB_NAME = "database5";
     private static final int DB_VERSION = 1;
 
     private static DBHelper instance;
@@ -166,9 +167,9 @@ public class DBHelper extends SQLiteOpenHelper {
     //get all the contactss of specified user
     @SuppressLint("Range")
     public ArrayList<Contact> searchAllUserContacts(int userID) {
-        ArrayList<Contact> contacts = new ArrayList<>();
+        ArrayList<Contact> Contacts = new ArrayList<>();
         String[] s = new String[]{String.valueOf(userID)};
-        Cursor cursor = this.getReadableDatabase().rawQuery("SELECT id,first_name,last_name,email,telephone FROM contact WHERE user_id=?", s);
+        Cursor cursor = this.getReadableDatabase().rawQuery("SELECT * FROM contact WHERE user_id=?", s);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 for (int i = 0; i < cursor.getCount(); i++) {
@@ -176,8 +177,10 @@ public class DBHelper extends SQLiteOpenHelper {
                     String lastName = cursor.getString(cursor.getColumnIndex("last_name"));
                     String telephone = cursor.getString(cursor.getColumnIndex("telephone"));
                     String email = cursor.getString(cursor.getColumnIndex("email"));
+                    String gender = cursor.getString(cursor.getColumnIndex("gender"));
                     int id = cursor.getInt( cursor.getColumnIndex("id") );
-                    contacts.add(new Contact(firstName, lastName, email, telephone,id));
+
+                    Contacts.add(new Contact(firstName, lastName, email, telephone, gender, id));
 
                     //move to the next row in the database
                     cursor.moveToNext();
@@ -186,16 +189,16 @@ public class DBHelper extends SQLiteOpenHelper {
             }
 
         }
-        return contacts;
+        return Contacts;
     }
 
     //search contacts of specified user
     @SuppressLint("Range")
-    public ArrayList<Contact> searchUserContacts(String name,int userID) {
-        ArrayList<Contact> contacts = new ArrayList<Contact>();
+    public ArrayList<Contact> searchUserContacts(String name, int userID) {
+        ArrayList<Contact> Contacts = new ArrayList<Contact>();
         String firstNameLastName = "%" + name + "%";
         String[] s = new String[]{String.valueOf(userID), firstNameLastName};
-        Cursor cursor = getReadableDatabase().rawQuery("SELECT id,first_name,last_name,email,telephone FROM contact WHERE user_id=? AND first_name_last_name LIKE ? ", s);
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM contact WHERE user_id=? AND first_name_last_name LIKE ? ", s);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 for (int i = 0; i < cursor.getCount(); i++) {
@@ -204,8 +207,9 @@ public class DBHelper extends SQLiteOpenHelper {
                     String telephone = cursor.getString(cursor.getColumnIndex("telephone"));
                     String email = cursor.getString(cursor.getColumnIndex("email"));
                     int id = cursor.getInt( cursor.getColumnIndex("id") );
+                    String gender = cursor.getString(cursor.getColumnIndex("gender"));
 
-                    contacts.add(new Contact(firstName, lastName, email, telephone,id));
+                    Contacts.add(new Contact(firstName, lastName, email, telephone,gender , id));
 
                     //move to the next row in the database
                     cursor.moveToNext();
@@ -215,7 +219,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
             }
         }
-    return contacts;
+    return Contacts;
     }
 
     //search contact by its unique id
@@ -223,14 +227,15 @@ public class DBHelper extends SQLiteOpenHelper {
     public Contact searchContact(int contactID){
         Contact contact=null;
         String[] parameters = new String[]{String.valueOf(contactID)};
-        Cursor cursor = getReadableDatabase().rawQuery("SELECT id,first_name,last_name,email,telephone FROM contact WHERE id=?",parameters);
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT id,first_name,last_name,email,telephone,gender FROM contact WHERE id=?",parameters);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 String firstName = cursor.getString(cursor.getColumnIndex("first_name"));
                 String lastName = cursor.getString(cursor.getColumnIndex("last_name"));
                 String telephone = cursor.getString(cursor.getColumnIndex("telephone"));
                 String email = cursor.getString(cursor.getColumnIndex("email"));
-                contact = new Contact(firstName, lastName, email, telephone);
+                String gender = cursor.getString(cursor.getColumnIndex("gender"));
+                contact = new Contact(firstName, lastName, email, telephone,gender );
             }
             Log.d("INFO",contact.toString());
             cursor.close();
@@ -238,7 +243,10 @@ public class DBHelper extends SQLiteOpenHelper {
         return contact;
     }
 
-    public long insertContact(String userID,String firstName,String lastName,String fullName,String telephone,String email){
+
+
+    public long insertContact(String userID, String firstName, String lastName, String fullName, String telephone, String email, String gender){
+
         ContentValues values = new ContentValues();
         values.put("user_id",userID);
         values.put("first_name",firstName);
@@ -246,9 +254,16 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put("first_name_last_name",fullName);
         values.put("telephone",telephone);
         values.put("email",email);
+        values.put("gender",gender);
         long rowID = getWritableDatabase().insert("contact",null,values);
+
         return rowID;
     }
+
+
+
+
+
 
     public long updateContact(int contactID, ContentValues contentValues ){
         String[] parameters = new String[]{String.valueOf(contactID)};

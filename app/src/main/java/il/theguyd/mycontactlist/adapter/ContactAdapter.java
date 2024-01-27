@@ -12,18 +12,17 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+
 import il.theguyd.mycontactlist.ContactActivity;
 import il.theguyd.mycontactlist.Models.Contact;
 import il.theguyd.mycontactlist.R;
-
-import java.io.Serializable;
-import java.util.ArrayList;
 
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder>  {
     private static final String TAG = "ContactAdapter";
 
     private Context context;
-    private ArrayList<Contact> contacts = new ArrayList<>();
+    private ArrayList<Contact> Contacts = new ArrayList<>();
 
     public ContactAdapter(Context context) {
         this.context = context;
@@ -43,14 +42,14 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder,  int position) {
         Log.d(TAG, "onBindViewHolder: called");
-        holder.txtName.setText(contacts.get(position).getFullName());
-        holder.txtTelephone.setText(contacts.get(position).getTelephone());
+        holder.txtName.setText(Contacts.get(position).getFullName());
+        holder.txtTelephone.setText(Contacts.get(position).getTelephone());
         holder.parent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //TODO: is it appropriate to navigate activities from adapter?
                 Intent intent = new Intent(context, ContactActivity.class);
-                intent.putExtra("contactID", contacts.get(position).getId());
+                intent.putExtra("contactID", Contacts.get(position).getId());
                 context.startActivity(intent);
             }
         });
@@ -58,10 +57,10 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
 
     @Override
     public int getItemCount() {
-        return contacts.size();
+        return Contacts.size();
     }
-    public void setContacts(ArrayList<Contact> contacts) {
-        this.contacts = contacts;
+    public void setContacts(ArrayList<Contact> Contacts) {
+        this.Contacts = Contacts;
         notifyDataSetChanged();
     }
     public class ViewHolder extends RecyclerView.ViewHolder  {

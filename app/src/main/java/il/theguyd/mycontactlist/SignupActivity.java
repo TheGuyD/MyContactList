@@ -1,7 +1,7 @@
 package il.theguyd.mycontactlist;
 
-import static il.theguyd.mycontactlist.utils.Validations.getWatcher;
-
+import static il.theguyd.mycontactlist.utils.Utils.getWatcherWithValidations;
+import static il.theguyd.mycontactlist.utils.Utils.isValidInput;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,18 +14,15 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
-import il.theguyd.mycontactlist.Models.User;
-
 
 public class SignupActivity extends AppCompatActivity {
 
-    EditText edtFirstName, edtLastName, edtEmailSignup, edtPasswordSignup, edtTelephone;
-    Button btnSignup1;
+   private EditText edtFirstName, edtLastName, edtEmailSignup, edtPasswordSignup, edtTelephone;
+   private Button btnSignup1;
 
-    DBHelper databaseHelper;
-    User user;
+    private DBHelper databaseHelper;
 
-    long userID;
+    private long userID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,55 +47,62 @@ public class SignupActivity extends AppCompatActivity {
 
     }
 
-    public void initButtonSignUp() {
+    private void initButtonSignUp() {
         btnSignup1 = findViewById(R.id.btnSignup1);
     }
-
-    public void setButtonsSignupListenersEventHandlers() {
-        btnSignup1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String email = edtEmailSignup.getText().toString();
-                String password = edtPasswordSignup.getText().toString();
-
-                try{
-                    userID = databaseHelper.insertUser(email,password);
-                }catch (Exception exception){
-                    Toast.makeText(SignupActivity.this, exception.getMessage().toString(), Toast.LENGTH_SHORT).show();
-                    Log.d("ERROR",exception.getMessage());
-                }
-
-                if(userID!=-1){
-                    Intent intent = new Intent(getApplicationContext(), SearchContactActivity.class);
-                    intent.putExtra("userID", (int)userID);
-                    startActivity(intent);
-                }
-                else{
-                    Toast.makeText(SignupActivity.this, "email exist or wrong", Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        });
-    }
-
-    public void initEditTextSignUp() {
+    private void initEditTextSignUp() {
         edtFirstName = findViewById(R.id.edtFirstName);
         edtLastName = findViewById(R.id.edtLastName);
         edtEmailSignup = findViewById(R.id.edtEmailSignup);
         edtPasswordSignup = findViewById(R.id.edtPasswordSignup);
         edtTelephone = findViewById(R.id.edtTelephone);
     }
-
-    public void setEditTextSignUpListenersEventHandlers() {
+    private void setEditTextSignUpListenersEventHandlers() {
 
         //getWatcher implement event handlers, the handlers also call data validations
-        edtFirstName.addTextChangedListener(getWatcher(edtFirstName, this));
-        edtLastName.addTextChangedListener(getWatcher(edtLastName, this));
-        edtEmailSignup.addTextChangedListener(getWatcher(edtEmailSignup, this));
-        edtPasswordSignup.addTextChangedListener(getWatcher(edtPasswordSignup, this));
-        edtTelephone.addTextChangedListener(getWatcher(edtTelephone, this));
+        edtFirstName.addTextChangedListener(getWatcherWithValidations(edtFirstName, this));
+        edtLastName.addTextChangedListener(getWatcherWithValidations(edtLastName, this));
+        edtEmailSignup.addTextChangedListener(getWatcherWithValidations(edtEmailSignup, this));
+        edtPasswordSignup.addTextChangedListener(getWatcherWithValidations(edtPasswordSignup, this));
+        edtTelephone.addTextChangedListener(getWatcherWithValidations(edtTelephone, this));
 
     }
+
+
+    private void setButtonsSignupListenersEventHandlers() {
+        btnSignup1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                String email = edtEmailSignup.getText().toString();
+                String password = edtPasswordSignup.getText().toString();
+
+                if(isValidInput(edtEmailSignup)){
+                    try{
+                        userID = databaseHelper.insertUser(email,password);
+                    }catch (Exception exception){
+                        Toast.makeText(SignupActivity.this, exception.getMessage().toString(), Toast.LENGTH_SHORT).show();
+                        Log.d("ERROR",exception.getMessage());
+                    }
+
+                    if(userID!=-1){
+                        Intent intent = new Intent(getApplicationContext(), SearchContactActivity.class);
+                        intent.putExtra("userID", (int)userID);
+                        startActivity(intent);
+                    }
+                    else{
+                        Toast.makeText(SignupActivity.this, "email exist", Toast.LENGTH_SHORT).show();
+                    }
+                }else{
+                    Toast.makeText(SignupActivity.this, "enter valid email address", Toast.LENGTH_SHORT).show();
+                }
+
+
+            }
+        });
+    }
+
+
 
 
 }

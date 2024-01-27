@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import il.theguyd.mycontactlist.R;
 
-public class Validations {
+public class Utils {
 
     public static boolean isValidInput(@NonNull EditText e){
         int inputType = e.getInputType();
@@ -52,7 +52,7 @@ public class Validations {
         return true;
     }
 
-    public static TextWatcher getWatcher(EditText edt, AppCompatActivity app) {
+    public static TextWatcher getWatcherWithValidations(EditText edt, AppCompatActivity app) {
         return new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
