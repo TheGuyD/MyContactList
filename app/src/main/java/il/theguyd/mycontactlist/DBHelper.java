@@ -4,11 +4,9 @@ import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -18,26 +16,34 @@ import il.theguyd.mycontactlist.Models.Contact;
 import il.theguyd.mycontactlist.Models.User;
 
 public class DBHelper extends SQLiteOpenHelper {
-    //TODO: all database operations should acure in here!!!!!!
-    //TODO: implement update,add,delete
-    private static final String DB_NAME = "database1";
+
+    private static final String DB_NAME = "database4";
     private static final int DB_VERSION = 1;
 
+    private static DBHelper instance;
     User user = null;
 
 
 
-    public DBHelper(@Nullable Context context) {
+    private DBHelper(@Nullable Context context) {
         super(context, DB_NAME, null, DB_VERSION);
+    }
+
+    //singleton to make sure only one instance of the database is used in the entire application
+    public static synchronized DBHelper getInstance(Context context) {
+        if (instance == null) {
+            instance = new DBHelper(context.getApplicationContext());
+        }
+        return instance;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         //create table named user with column (id,first_name,last_name,email,password,telephone)
-        String sqlStatementCreateUserTable = "CREATE TABLE user (id INTEGER PRIMARY KEY AUTOINCREMENT , first_name TEXT NOT NULL , last_name TEXT NOT NULL , email TEXT NOT NULL UNIQUE , telephone TEXT , password TEXT NOT NULL )";
+        String sqlStatementCreateUserTable = "CREATE TABLE user (id INTEGER PRIMARY KEY AUTOINCREMENT , first_name TEXT  , last_name TEXT , email TEXT NOT NULL UNIQUE , telephone TEXT , password TEXT NOT NULL )";
 
         //create table named contact with column (id,user_id,first_name,last_name,first_name_last_name,gender,email,telephone)
-        String sqlStatementCreateContactTable = "CREATE TABLE contact (id INTEGER PRIMARY KEY AUTOINCREMENT , user_id  INTEGER , first_name TEXT NOT NULL , last_name TEXT NOT NULL , first_name_last_name  TEXT , gender TEXT , email TEXT , telephone TEXT NOT NULL , FOREIGN KEY (user_id) REFERENCES user(id) )";
+        String sqlStatementCreateContactTable = "CREATE TABLE contact (id INTEGER PRIMARY KEY AUTOINCREMENT , user_id  INTEGER , first_name TEXT NOT NULL , last_name TEXT NOT NULL , first_name_last_name  TEXT , gender TEXT , email TEXT , telephone TEXT  NOT NULL UNIQUE, FOREIGN KEY (user_id) REFERENCES user(id) )";
 
         //execute creation
         db.execSQL(sqlStatementCreateUserTable);
@@ -132,7 +138,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    //search user query for userID based on email and password
+    //searchUser, query for userID based on email and password
     @SuppressLint("Range")
     public User searchUser(String email, String password) {
 
@@ -157,11 +163,12 @@ public class DBHelper extends SQLiteOpenHelper {
         return user;
     }
 
+    //get all the contactss of specified user
     @SuppressLint("Range")
-    public ArrayList<Contact> getAllUserContacts(int userID) {
-        ArrayList<Contact> contacts = new ArrayList<Contact>();
+    public ArrayList<Contact> searchAllUserContacts(int userID) {
+        ArrayList<Contact> contacts = new ArrayList<>();
         String[] s = new String[]{String.valueOf(userID)};
-        Cursor cursor = this.getReadableDatabase().rawQuery("SELECT first_name,last_name,email,telephone FROM contact WHERE user_id=?", s);
+        Cursor cursor = this.getReadableDatabase().rawQuery("SELECT id,first_name,last_name,email,telephone FROM contact WHERE user_id=?", s);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 for (int i = 0; i < cursor.getCount(); i++) {
@@ -169,7 +176,8 @@ public class DBHelper extends SQLiteOpenHelper {
                     String lastName = cursor.getString(cursor.getColumnIndex("last_name"));
                     String telephone = cursor.getString(cursor.getColumnIndex("telephone"));
                     String email = cursor.getString(cursor.getColumnIndex("email"));
-                    contacts.add(new Contact(firstName, lastName, firstName + " " + lastName, email, telephone));
+                    int id = cursor.getInt( cursor.getColumnIndex("id") );
+                    contacts.add(new Contact(firstName, lastName, email, telephone,id));
 
                     //move to the next row in the database
                     cursor.moveToNext();
@@ -181,12 +189,13 @@ public class DBHelper extends SQLiteOpenHelper {
         return contacts;
     }
 
+    //search contacts of specified user
     @SuppressLint("Range")
     public ArrayList<Contact> searchUserContacts(String name,int userID) {
         ArrayList<Contact> contacts = new ArrayList<Contact>();
         String firstNameLastName = "%" + name + "%";
         String[] s = new String[]{String.valueOf(userID), firstNameLastName};
-        Cursor cursor = getReadableDatabase().rawQuery("SELECT first_name,last_name,email,telephone FROM contact WHERE user_id=? AND first_name_last_name LIKE ? ", s);
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT id,first_name,last_name,email,telephone FROM contact WHERE user_id=? AND first_name_last_name LIKE ? ", s);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 for (int i = 0; i < cursor.getCount(); i++) {
@@ -194,7 +203,9 @@ public class DBHelper extends SQLiteOpenHelper {
                     String lastName = cursor.getString(cursor.getColumnIndex("last_name"));
                     String telephone = cursor.getString(cursor.getColumnIndex("telephone"));
                     String email = cursor.getString(cursor.getColumnIndex("email"));
-                    contacts.add(new Contact(firstName, lastName, firstName + " " + lastName, email, telephone));
+                    int id = cursor.getInt( cursor.getColumnIndex("id") );
+
+                    contacts.add(new Contact(firstName, lastName, email, telephone,id));
 
                     //move to the next row in the database
                     cursor.moveToNext();
@@ -206,6 +217,68 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     return contacts;
     }
+
+    //search contact by its unique id
+    @SuppressLint("Range")
+    public Contact searchContact(int contactID){
+        Contact contact=null;
+        String[] parameters = new String[]{String.valueOf(contactID)};
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT id,first_name,last_name,email,telephone FROM contact WHERE id=?",parameters);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                String firstName = cursor.getString(cursor.getColumnIndex("first_name"));
+                String lastName = cursor.getString(cursor.getColumnIndex("last_name"));
+                String telephone = cursor.getString(cursor.getColumnIndex("telephone"));
+                String email = cursor.getString(cursor.getColumnIndex("email"));
+                contact = new Contact(firstName, lastName, email, telephone);
+            }
+            Log.d("INFO",contact.toString());
+            cursor.close();
+        }
+        return contact;
+    }
+
+    public long insertContact(String userID,String firstName,String lastName,String fullName,String telephone,String email){
+        ContentValues values = new ContentValues();
+        values.put("user_id",userID);
+        values.put("first_name",firstName);
+        values.put("last_name",lastName);
+        values.put("first_name_last_name",fullName);
+        values.put("telephone",telephone);
+        values.put("email",email);
+        long rowID = getWritableDatabase().insert("contact",null,values);
+        return rowID;
+    }
+
+    public long updateContact(int contactID, ContentValues contentValues ){
+        String[] parameters = new String[]{String.valueOf(contactID)};
+        int rowID = getWritableDatabase().update("contact",contentValues,"id=?",parameters);
+        return rowID;
+    }
+
+    public long deleteContact(int contactID){
+        String[] parameters = new String[]{String.valueOf(contactID)};
+        int rowID = getWritableDatabase().delete("contact","id=?",parameters);
+        return rowID;
+    }
+
+
+    public long insertUser(String email, String password){
+        long userID;
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("email",email);
+        contentValues.put("password",password);
+
+        //insert will return the rowID which is the userID hence we do need delete users
+        userID = getWritableDatabase().insert("user",null,contentValues);
+        return userID;
+    }
+
+
+
+
+
+
 
 
 

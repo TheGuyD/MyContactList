@@ -2,11 +2,8 @@ package il.theguyd.mycontactlist;
 
 import static il.theguyd.mycontactlist.utils.Validations.getWatcher;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -34,25 +31,35 @@ public class SigninActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //enable full screen
         EdgeToEdge.enable(this);
+
+        //set the layout for UI
         setContentView(R.layout.activity_signin);
-    databaseHelper = new DBHelper(this);
-    initSigninEditText();
-    initSigninButton();
-    setSigninButtonsListenersAndEventHandlers();
-    setSigninEditTextListenersAndEventHandlers();
+
+        //init DBHelper instance
+        databaseHelper = DBHelper.getInstance(this);
+
+        //init Views
+        initEditTextSignin();
+        initButtonsSignin();
+
+        //set listeners and handlers
+        setButtonsSigninListenersEventHandlers();
+        setEditTextSigninListenersEventHandlers();
     }
 
-    private void initSigninButton() {
+    private void initButtonsSignin() {
         btnSignin1 = findViewById(R.id.btnSignin1);
     }
 
-    private void initSigninEditText() {
+    private void initEditTextSignin() {
         edtEmailSignin = findViewById(R.id.edtEmailSignin);
         edtTxtPasswordSignin = findViewById(R.id.edtTxtPasswordSignin);
     }
 
-    public void setSigninEditTextListenersAndEventHandlers(){
+    public void setEditTextSigninListenersEventHandlers(){
 
         //getWatcher implement Watcher event handler, in addition it also implement data validations
         edtEmailSignin.addTextChangedListener(getWatcher(edtEmailSignin,this));
@@ -61,25 +68,33 @@ public class SigninActivity extends AppCompatActivity {
 
     }
 
-    public void setSigninButtonsListenersAndEventHandlers(){
+    public void setButtonsSigninListenersEventHandlers(){
         btnSignin1.setOnClickListener(new View.OnClickListener() {
-            //event handler
+
+            //user clicked signin
             @Override
             public void onClick(View view) {
 
-                //get the text from use input
+                //get email and password from user input
                 String email = edtEmailSignin.getText().toString();
                 String password = edtTxtPasswordSignin.getText().toString();
                 try{
+
+                    //validate user email and password using the database;
                     user = databaseHelper.searchUser(email,password);
                 }catch (SQLException exception){
                     Log.d("ERROR",exception.getMessage().toString());
                 }
                 if(user != null){
+
+
+                    Intent intent = new Intent(getApplicationContext(), SearchContactActivity.class);
+
+                    //pass userID to SearchContactActivity
+                    intent.putExtra("userID", user.getId());
+
                     //start SearchContactActivity
-                    Intent i = new Intent(getApplicationContext(), SearchContactActivity.class);
-                    i.putExtra("userID", user.getId());
-                    startActivity(i);
+                    startActivity(intent);
                 }else{
                     Toast.makeText(SigninActivity.this,"wrong email or password",Toast.LENGTH_SHORT).show();
                 }

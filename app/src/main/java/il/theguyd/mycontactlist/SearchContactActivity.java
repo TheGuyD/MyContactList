@@ -42,43 +42,48 @@ public class SearchContactActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //enable full screen
         EdgeToEdge.enable(this);
+
+        //set the layout for UI
         setContentView(R.layout.activity_search_contact);
-        databaseHelper = new DBHelper(SearchContactActivity.this);
 
-        //get the userID from the previuse activity (SigninActivity) hence it is the forenkey
+        //init DBHelper
+        databaseHelper = DBHelper.getInstance(SearchContactActivity.this);
+
+        //get the userID from the  previous activity (SigninActivity) hence it is the foreign key
         //in the contact table
-        Intent intent = getIntent();
-        userID = intent.getIntExtra("userID",0);
-        Toast.makeText(this,"userID:"+String.valueOf(userID),Toast.LENGTH_SHORT).show();
+        userID = getIntent().getIntExtra("userID",0);
+        Toast.makeText(this,"userID:"+userID,Toast.LENGTH_SHORT).show();
 
-        initSearchEditTexts();
-        initSearchImageViews();
-        initSearchButtonViews();
+        //init Views
+        initEditTextsSearch();
+        initImageViewsSearch();
+        initButtonsSearch();
         initRecyclerViews();
 
 
 
-        //initiate adapter to adapt data for RecycleView items
+        //init adapter to adapt data for RecycleView items
         adapter = new ContactAdapter(this);
         adapter.setContacts(contacts);
         rcContact.setLayoutManager(new LinearLayoutManager(this));
         rcContact.setAdapter(adapter);
 
+        //when SearchContactActivity is load it show all contacts
+        //that belongs to useID
         showAllContacts();
 
-        btnAddContact.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = new Intent(getApplicationContext(), AddContactActivity.class);
-                i.putExtra("userID", userID);
-                startActivity(i);
-            }
-        });
+
+        //set listeners and handlers
+        setFloatingActionButtonSearchContactsListenersAndEventsHandlers();
+        setEditTextsSearchContactsListenersAndEventHandlers();
 
 
+    }
 
-
+    private void setEditTextsSearchContactsListenersAndEventHandlers() {
         edtSearch.addTextChangedListener(new TextWatcher() {
             //TODO: edit the search to except one line only
             @Override
@@ -98,7 +103,25 @@ public class SearchContactActivity extends AppCompatActivity {
         });
     }
 
+    private void setFloatingActionButtonSearchContactsListenersAndEventsHandlers() {
+        btnAddContact.setOnClickListener(new View.OnClickListener() {
+
+           //user clicked on the floating plus button
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), AddContactActivity.class);
+
+                //pass to AddContactActivity
+                intent.putExtra("userID", userID);
+
+                //start AddContactActivity
+                startActivity(intent);
+            }
+        });
+    }
+
     private void showAllContacts() {
+       boolean isFound = false;
         if(isValidInput(edtSearch)){
             //TODO: initialize the search in thread
 
@@ -108,11 +131,12 @@ public class SearchContactActivity extends AppCompatActivity {
             try{
 
                 //add all the contacts of the user after query by userID
-                contacts.addAll(databaseHelper.getAllUserContacts(userID));
-            }catch (SQLException exception){
-                Log.d("ERROR",exception.getMessage().toString());
+                contacts.addAll(databaseHelper.searchAllUserContacts(userID));
+            }catch (Exception exception){
+                Log.d("ERROR",exception.getMessage());
             }
-            if(contacts!= null){
+            isFound = contacts!= null;
+            if(isFound){
 
                 //notify all observers.
                 adapter.notifyDataSetChanged();
@@ -126,7 +150,7 @@ public class SearchContactActivity extends AppCompatActivity {
 
     private void showUserContactByName(CharSequence charSequence){
 
-        //clear the contacts so whenever the user input is change only new resaults shown
+        //clear the contacts so whenever the user input is change only new results shown
         contacts.clear();
 
 
@@ -153,21 +177,36 @@ public class SearchContactActivity extends AppCompatActivity {
     }
 
 
+
+    //whenever user return to the current activity, right before it fully loaded
+    //the contacts are refresh
+    @Override
+    protected void onResume() {
+        super.onResume();
+        showAllContacts();
+    }
+
+
     private void initRecyclerViews() {
         rcContact = findViewById(R.id.rcContact);
     }
 
-    private void initSearchButtonViews() {
+    private void initButtonsSearch() {
         btnAddContact = findViewById(R.id.btnAddContact);
     }
 
-    private void initSearchImageViews() {
+    private void initImageViewsSearch() {
         btnSearch = findViewById(R.id.btnSearch);
     }
 
-    private void initSearchEditTexts(){
+    private void initEditTextsSearch(){
         edtSearch = findViewById(R.id.edtSearch);
     }
+
+    public  ArrayList<Contact> getContacts(){
+        return this.contacts;
+    }
+
 
 
 }

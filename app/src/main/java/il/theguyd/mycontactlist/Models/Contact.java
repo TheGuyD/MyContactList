@@ -1,10 +1,12 @@
 package il.theguyd.mycontactlist.Models;
 
 
-public class Contact {
+
+
+public class Contact   {
     private int id;
 
-    private int userID;
+
     private String firstName;
     private String lastName;
 
@@ -13,16 +15,27 @@ public class Contact {
     private String email;
     private String telephone;
 
-    public Contact(int id, int userID, String firstName, String lastName, String gender, String email, String telephone) {
-        this.id = id;
-        this.userID = userID;
+
+
+    //use for new contact insertion
+    public Contact(String firstName, String lastName, String email, String telephone) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.fullName = firstName+" "+lastName;
-        this.gender = gender;
         this.email = email;
         this.telephone = telephone;
+        this.fullName = firstName +" "+lastName;
     }
+
+    //use for search  contacts
+    public Contact(String firstName, String lastName, String email, String telephone, int id) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.telephone = telephone;
+        this.fullName = firstName +" "+lastName;
+        this.id = id;
+    }
+
 
     @Override
     public String toString() {
@@ -35,16 +48,9 @@ public class Contact {
                 '}';
     }
 
-    public Contact(String firstName, String lastName, String fullName, String email, String telephone) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.fullName = fullName;
-        this.email = email;
-        this.telephone = telephone;
-    }
 
-    public Contact() {
-    }
+
+
 
     public int getId() {
         return id;
@@ -54,13 +60,7 @@ public class Contact {
         this.id = id;
     }
 
-    public int getUserID() {
-        return userID;
-    }
 
-    public void setUserID(int userID) {
-        this.userID = userID;
-    }
 
     public String getFirstName() {
         return firstName;
@@ -91,7 +91,9 @@ public class Contact {
     }
 
     public void setGender(String gender) {
+        //TODO: user retrofit to set the gender
         this.gender = gender;
+
     }
 
     public String getEmail() {

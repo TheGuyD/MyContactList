@@ -16,9 +16,10 @@ import il.theguyd.mycontactlist.ContactActivity;
 import il.theguyd.mycontactlist.Models.Contact;
 import il.theguyd.mycontactlist.R;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> {
+public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder>  {
     private static final String TAG = "ContactAdapter";
 
     private Context context;
@@ -47,10 +48,9 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         holder.parent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: navigate to another activity
+                //TODO: is it appropriate to navigate activities from adapter?
                 Intent intent = new Intent(context, ContactActivity.class);
-                //TODO: get the contact id os it will pas to the edit activity
-                //intent.putExtra("contactID", contacts.get(position));
+                intent.putExtra("contactID", contacts.get(position).getId());
                 context.startActivity(intent);
             }
         });
@@ -64,7 +64,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         this.contacts = contacts;
         notifyDataSetChanged();
     }
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder  {
 
         private TextView txtName;
         private TextView txtTelephone;

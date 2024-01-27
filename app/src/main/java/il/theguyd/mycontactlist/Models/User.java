@@ -7,6 +7,7 @@ public class User {
     private String telephone;
     private String password;
 
+   //use for search user
     public User(int id, String name, String email, String telephone) {
         this.id = id;
         this.name = name;
@@ -14,10 +15,7 @@ public class User {
         this.telephone = telephone;
     }
 
-    public User(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
+
 
     public String getPassword() {
         return password;
@@ -27,8 +25,6 @@ public class User {
         this.password = password;
     }
 
-    public User() {
-    }
 
     public int getId() {
         return id;
