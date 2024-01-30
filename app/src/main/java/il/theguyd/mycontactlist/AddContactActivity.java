@@ -141,7 +141,7 @@ public class AddContactActivity extends AppCompatActivity {
 
                     }else{
                             if(response.code() == 429){
-                                Toast.makeText(AddContactActivity.this,"genderize API rate limit, insert gender yourself ",Toast.LENGTH_SHORT).show();
+                                Toast.makeText(AddContactActivity.this,"genderize API rate limit",Toast.LENGTH_SHORT).show();
 
                             }
 
