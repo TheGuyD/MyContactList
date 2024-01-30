@@ -18,7 +18,7 @@ import il.theguyd.mycontactlist.Models.User;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private static final String DB_NAME = "database5";
+    private static final String DB_NAME = "database";
     private static final int DB_VERSION = 1;
 
     private static DBHelper instance;
